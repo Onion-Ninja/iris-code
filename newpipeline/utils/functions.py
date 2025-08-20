@@ -80,7 +80,7 @@ def gaborconvolve_f(img, minw_length, mult, sigma_f):
 ##########################################################################
 # Function to extract the feature for the matching process
 ##########################################################################
-def extractFeature(img_filename, eyelashes_threshold=80, multiprocess=True):
+def extractFeature(img_filename, eyelashes_threshold=80, multiprocess=False):
     """
     Extract features from an iris image
     """
@@ -182,32 +182,37 @@ def HammingDistance(template1, mask1, template2, mask2):
     return hd
 
 
+# def shiftbits_ham(template, noshifts):
+#     """
+#     Shift the bit-wise iris patterns.
+#     """
+#     templatenew = np.zeros(template.shape)
+#     width = template.shape[1]
+#     s = 2 * np.abs(noshifts)
+#     p = width - s
+
+#     if noshifts == 0:
+#         templatenew = template
+
+#     elif noshifts < 0:
+#         x = np.arange(p)
+#         templatenew[:, x] = template[:, s + x]
+#         x = np.arange(p, width)
+#         templatenew[:, x] = template[:, x - p]
+
+#     else:
+#         x = np.arange(s, width)
+#         templatenew[:, x] = template[:, x - s]
+#         x = np.arange(s)
+#         templatenew[:, x] = template[:, p + x]
+
+#     return templatenew
+
 def shiftbits_ham(template, noshifts):
-    """
-    Shift the bit-wise iris patterns.
-    """
-    templatenew = np.zeros(template.shape)
-    width = template.shape[1]
-    s = 2 * np.abs(noshifts)
-    p = width - s
-
-    if noshifts == 0:
-        templatenew = template
-
-    elif noshifts < 0:
-        x = np.arange(p)
-        templatenew[:, x] = template[:, s + x]
-        x = np.arange(p, width)
-        templatenew[:, x] = template[:, x - p]
-
-    else:
-        x = np.arange(s, width)
-        templatenew[:, x] = template[:, x - s]
-        x = np.arange(s)
-        templatenew[:, x] = template[:, p + x]
-
-    return templatenew
-
+    template_flat = template.flatten()
+    shifted_flat = np.roll(template_flat, noshifts * 2) # * 2 for binary template
+    return shifted_flat.reshape(template.shape)
+    
 
 def matchingPool(file_temp_name, template_extr, mask_extr, template_dir):
     """

@@ -152,7 +152,7 @@ def ContourIntegralCircular(imagen, y_0, x_0, r, angs):
 ###############################################################################
 
 
-def segment(eyeim, eyelashes_thres=80, use_multiprocess=True):
+def segment(eyeim, eyelashes_thres=80, use_multiprocess=False):
     """
         Segment the iris from the image
     """
@@ -225,7 +225,8 @@ def findTopEyelid(imsz, imageiris, irl, icl, rowp, rp, ret_top=None):
     Find and mask for the top eyelid region.
     """
     topeyelid = imageiris[0: rowp - irl - rp, :]
-    lines = findline(topeyelid)
+    topeyelid_safe = np.ascontiguousarray(topeyelid, dtype=np.float64)
+    lines = findline(topeyelid_safe)
     mask = np.zeros(imsz, dtype=float)
 
     if lines.size > 0:
@@ -250,7 +251,8 @@ def findBottomEyelid(imsz, imageiris, rowp, rp, irl, icl, ret_bot=None):
     Find and mask for the bottom eyelid region.
     """
     bottomeyelid = imageiris[rowp - irl + rp - 1 : imageiris.shape[0], :]
-    lines = findline(bottomeyelid)
+    bottomeyelid_safe = np.ascontiguousarray(bottomeyelid, dtype=np.float64)
+    lines = findline(bottomeyelid_safe)
     mask = np.zeros(imsz, dtype=float)
 
     if lines.size > 0:
@@ -280,7 +282,10 @@ def findline(img):
     """
     I2, orient = canny(img, 2, 0, 1)
     I3 = adjgamma(I2, 1.9)
-    I4 = nonmaxsup(I3, orient, 1.5)
+    I3_safe = np.ascontiguousarray(I3, dtype=np.float64)
+    orient_safe = np.ascontiguousarray(orient, dtype=np.float64)
+    I4 = nonmaxsup(I3_safe, orient_safe, 1.5)
+    # I4 = nonmaxsup(I3, orient, 1.5)
     edgeimage = hysthresh(I4, 0.2, 0.15)
 
     # Radon transformation
